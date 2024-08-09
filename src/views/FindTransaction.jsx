@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // or import axiosInstance from './axiosInstance';
+
 
 const FindTransaction = () => {
   const orders = [
@@ -29,16 +31,28 @@ const FindTransaction = () => {
   const [searchValue, setSearchValue] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleSearch = () => {
+
+// Define state and other necessary hooks here
+// ...
+
+const handleSearch = async () => {
+  try {
     let results;
     if (searchBy === 'orderId') {
-      results = orders.filter(order => order.orderId === parseInt(searchValue));
+      const order = await axios.get(`http://localhost:9191/orders/${searchValue}`);
+      results = order.data ? [order.data] : []; 
     } else {
-      results = orders.filter(order => order.country === searchValue);
+      const response = await axios.get(`http://localhost:9191/orders?country=${searchValue}`);
+      results = response.data; 
     }
     setFilteredOrders(results);
     setMessage(results.length === 0 ? 'No orders found' : '');
-  };
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    setMessage('Error fetching orders');
+  }
+};
+
 
   return (
     <div className="flex flex-col items-center h-screen bg-gray-100">
